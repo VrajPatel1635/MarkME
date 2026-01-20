@@ -222,20 +222,22 @@ const BulkStudentUploadForm = ({ isOpen, onClose, classroomId, onUploaded, mode 
                 </div>
               )}
 
-              <button
-                disabled={submitting}
-                className="w-full mt-2 sm:mt-4 bg-(--primary-accent) disabled:opacity-60 text-(--primary-bg) p-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-(--primary-text) transition-all shadow-[0_10px_15px_-3px_rgb(var(--primary-accent-rgb)/0.2)] hover:-translate-y-0.5"
-              >
-                <Upload size={18} /> {submitting ? "Uploading..." : "Upload"}
-              </button>
-
-              <div className="flex justify-end gap-2">
+              {/* Buttons on a single line: Close first, then Upload */}
+              <div className="flex gap-2 pt-1">
                 <button
                   type="button"
                   onClick={onClose}
                   className="flex-1 px-4 py-2.5 rounded-xl border border-[rgb(var(--primary-accent-rgb)/0.1)] text-(--primary-accent) font-semibold hover:bg-red-500 hover:text-white transition-colors"
                 >
                   {result ? "Close" : "Cancel"}
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex-1 bg-(--primary-accent) disabled:opacity-60 text-(--primary-bg) p-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-(--primary-text) transition-all shadow-[0_10px_15px_-3px_rgb(var(--primary-accent-rgb)/0.2)] hover:-translate-y-0.5"
+                >
+                  <Upload size={18} /> {submitting ? "Uploading..." : "Upload"}
                 </button>
               </div>
 
