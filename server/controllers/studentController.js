@@ -4,6 +4,13 @@ const Classroom = require("../model/Classroom");
 const School = require("../model/School");
 const AttendanceRecord = require("../model/AttendanceRecord");
 const excelParser = require("../utils/excelParser");
+const {
+  BULK_STUDENT_EXCEL_RULES,
+  normalizeGender,
+  parseRollNumber,
+  parseDob,
+  createBulkStudentsTemplateBuffer,
+} = require("../utils/bulkStudentExcel");
 const { uploadToCloudinary, deleteFromCloudinary, uploadFileToCloudinary } = require("../utils/cloudinaryHelper");
 const aiClient = require("../utils/aiClient");
 const fs = require('fs');
@@ -52,6 +59,29 @@ exports.getStudents = async (req, res) => {
   } catch (err) {
     console.error("getStudents error:", err);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+// GET /api/students/bulk-upload/rules
+exports.getBulkUploadRules = async (req, res) => {
+  res.json(BULK_STUDENT_EXCEL_RULES);
+};
+
+// GET /api/students/bulk-upload/template
+exports.downloadBulkUploadTemplate = async (req, res) => {
+  try {
+    const buffer = createBulkStudentsTemplateBuffer();
+    const fileName = "bulk-students-template.xlsx";
+
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader("Content-Disposition", `attachment; filename=\"${fileName}\"`);
+    res.send(buffer);
+  } catch (err) {
+    console.error("downloadBulkUploadTemplate error:", err);
+    res.status(500).json({ message: "Failed to generate template" });
   }
 };
 
@@ -306,49 +336,102 @@ exports.bulkUpload = async (req, res) => {
 
     const parsed = await excelParser(fileBuffer);
 
-    let results = [];
-    let validRows = [];
+    const resultsByRow = new Map();
+    const candidates = []; // { rowIndex, doc }
+    const seenRollNumbers = new Set();
 
-    for (let row of parsed) {
-      let errors = [];
+    for (const row of parsed || []) {
+      const rowIndex = row?.rowIndex;
+      const errors = [];
 
-      if (!row.name) errors.push("name required");
-      if (!row.rollNumber) errors.push("rollNumber required");
+      const name = String(row?.name ?? "").trim();
+      if (!name) errors.push("name required");
+
+      const rollParsed = parseRollNumber(row?.rollNumber);
+      if (rollParsed.error) errors.push(rollParsed.error);
+
+      if (!rollParsed.error && rollParsed.value != null) {
+        if (seenRollNumbers.has(rollParsed.value)) {
+          errors.push("Duplicate rollNumber in Excel file");
+        } else {
+          seenRollNumbers.add(rollParsed.value);
+        }
+      }
+
+      const dobParsed = parseDob(row?.dob);
+      if (dobParsed.error) errors.push(dobParsed.error);
+
+      const genderParsed = normalizeGender(row?.gender);
+      if (genderParsed.error) errors.push(genderParsed.error);
+
+      const profileImageUrl = String(row?.profileImageUrl ?? "").trim();
+
+      // Ignore completely empty rows (common in Excel)
+      const isTrulyEmpty = !name && !String(row?.rollNumber ?? "").trim() && !String(row?.dob ?? "").trim() && !String(row?.gender ?? "").trim() && !profileImageUrl;
+      if (isTrulyEmpty) continue;
 
       if (errors.length) {
-        results.push({ row: row.rowIndex, success: false, errors });
+        resultsByRow.set(rowIndex, { row: rowIndex, success: false, errors });
         continue;
       }
 
-      // Check DB duplicates
-      const exists = await Student.findOne({ classId, rollNumber: row.rollNumber });
-      if (exists) {
-        results.push({
-          row: row.rowIndex,
-          success: false,
-          errors: ["Duplicate rollNumber in DB"]
-        });
-        continue;
-      }
-
-      validRows.push({
+      const doc = {
         schoolId: schoolId,
         classId,
-        name: row.name,
-        rollNumber: row.rollNumber,
-        dob: row.dob || null,
-        gender: row.gender || null,
-        profileImageUrl: row.profileImageUrl || null
-      });
+        name,
+        rollNumber: rollParsed.value,
+        dob: dobParsed.value || null,
+        gender: genderParsed.value || null,
+        profileImageUrl: profileImageUrl || null,
+      };
 
-      results.push({ row: row.rowIndex, success: true, errors: [] });
+      candidates.push({ rowIndex, doc });
+      resultsByRow.set(rowIndex, { row: rowIndex, success: true, errors: [] });
     }
 
-    if (validRows.length > 0) {
-      await Student.insertMany(validRows, { ordered: false });
+    // DB duplicate check (single query)
+    if (candidates.length > 0) {
+      const rollNumbers = candidates.map((c) => c.doc.rollNumber);
+      const existing = await Student.find({ classId, rollNumber: { $in: rollNumbers } })
+        .select("rollNumber")
+        .lean();
+      const existingSet = new Set((existing || []).map((x) => x.rollNumber));
+
+      for (const c of candidates) {
+        if (existingSet.has(c.doc.rollNumber)) {
+          resultsByRow.set(c.rowIndex, { row: c.rowIndex, success: false, errors: ["Duplicate rollNumber in DB"] });
+          c.skip = true;
+        }
+      }
     }
 
-    res.json({ uploaded: validRows.length, results, fileUrl: secureUrl });
+    const docsToInsert = candidates.filter((c) => !c.skip).map((c) => c.doc);
+    const metaToInsert = candidates.filter((c) => !c.skip);
+
+    let uploaded = 0;
+    if (docsToInsert.length > 0) {
+      try {
+        const inserted = await Student.insertMany(docsToInsert, { ordered: false });
+        uploaded = Array.isArray(inserted) ? inserted.length : docsToInsert.length;
+      } catch (insertErr) {
+        // Handle partial success for ordered:false
+        const writeErrors = Array.isArray(insertErr?.writeErrors) ? insertErr.writeErrors : [];
+        const failedIndexes = new Set(writeErrors.map((e) => e.index));
+
+        for (const e of writeErrors) {
+          const meta = metaToInsert[e.index];
+          if (!meta) continue;
+          const msg = e?.code === 11000 ? "Duplicate rollNumber in DB" : (e?.errmsg || "Insert failed");
+          resultsByRow.set(meta.rowIndex, { row: meta.rowIndex, success: false, errors: [msg] });
+        }
+
+        // Count successes = attempted - failed
+        uploaded = metaToInsert.length - failedIndexes.size;
+      }
+    }
+
+    const results = Array.from(resultsByRow.values()).sort((a, b) => (a.row || 0) - (b.row || 0));
+    res.json({ uploaded, results, fileUrl: secureUrl });
 
   } catch (err) {
     console.error("bulkUpload error:", err);

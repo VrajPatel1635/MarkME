@@ -1,6 +1,6 @@
 // src/api/student.api.js
 
-import { apiFetch } from "./http";
+import { apiFetch, getBaseUrl, getStoredToken } from "./http";
 import defaultStudentPhoto from "../assets/no-result-document-file-data-600nw-2293706569.webp";
 
 const DEFAULT_AVATAR = defaultStudentPhoto;
@@ -81,6 +81,36 @@ export const bulkUploadStudentsExcel = async ({ classId, file }) => {
   form.append("classId", classId);
   form.append("excelFile", file);
   return apiFetch("/students/bulk-upload", { method: "POST", auth: true, body: form });
+};
+
+export const fetchBulkStudentUploadRules = async () => {
+  return apiFetch("/students/bulk-upload/rules", { method: "GET", auth: true });
+};
+
+export const downloadBulkStudentUploadTemplate = async () => {
+  const url = `${getBaseUrl()}/students/bulk-upload/template`;
+  const token = getStoredToken();
+  const res = await fetch(url, {
+    method: "GET",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(text || `Template download failed (${res.status})`);
+  }
+
+  const blob = await res.blob();
+  const a = document.createElement("a");
+  const href = URL.createObjectURL(blob);
+  a.href = href;
+  a.download = "bulk-students-template.xlsx";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(href);
+  return true;
 };
 
 export const bulkUploadStudentPhotosZip = async ({ classId, file }) => {

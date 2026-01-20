@@ -3,11 +3,23 @@ const xlsx = require("xlsx");
 
 module.exports = function parseExcel(input) {
   try {
+    // Support Buffer, ArrayBuffer (axios arraybuffer), or file path.
+    const isArrayBuffer =
+      input &&
+      (input instanceof ArrayBuffer ||
+        (typeof ArrayBuffer !== "undefined" && ArrayBuffer.isView && ArrayBuffer.isView(input)));
+
+    const asBuffer = Buffer.isBuffer(input)
+      ? input
+      : isArrayBuffer
+      ? Buffer.from(input instanceof ArrayBuffer ? new Uint8Array(input) : input)
+      : null;
+
     let workbook;
-    if (Buffer.isBuffer(input)) {
-      workbook = xlsx.read(input, { type: 'buffer' });
+    if (asBuffer) {
+      workbook = xlsx.read(asBuffer, { type: "buffer", cellDates: true });
     } else {
-      workbook = xlsx.readFile(input);
+      workbook = xlsx.readFile(input, { cellDates: true });
     }
 
     const sheet = workbook.Sheets[workbook.SheetNames[0]];

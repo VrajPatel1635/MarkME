@@ -18,6 +18,34 @@ const { uploadExcel, uploadZip } = require("../middlewares/uploadMiddleware");
 router.get("/", auth, studentController.getStudents);
 
 /*
+    ================================================
+    @route   GET /api/students/bulk-upload/rules
+    @desc    Get Excel rules for bulk student upload
+    @access  Teacher/Admin/Principal
+    ================================================
+*/
+router.get(
+    "/bulk-upload/rules",
+    auth,
+    requireAnyRole(["ADMIN", "TEACHER", "PRINCIPAL"]),
+    studentController.getBulkUploadRules
+);
+
+/*
+    ================================================
+    @route   GET /api/students/bulk-upload/template
+    @desc    Download Excel template for bulk upload
+    @access  Teacher/Admin/Principal
+    ================================================
+*/
+router.get(
+    "/bulk-upload/template",
+    auth,
+    requireAnyRole(["ADMIN", "TEACHER", "PRINCIPAL"]),
+    studentController.downloadBulkUploadTemplate
+);
+
+/*
     ================================
     @route   GET /api/students/:id
     @desc    Get a single student by id
