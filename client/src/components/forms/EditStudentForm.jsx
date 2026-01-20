@@ -7,6 +7,7 @@ const EditStudentForm = ({ isOpen, onClose, student, classroomId, onUpdated }) =
   const [form, setForm] = useState({ name: "", rollNo: "", gender: "", dob: "", photo: null });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const isMobileBrowser = useMemo(() => {
     if (typeof navigator === "undefined") return false;
@@ -30,6 +31,7 @@ const EditStudentForm = ({ isOpen, onClose, student, classroomId, onUpdated }) =
       photo: null,
     });
     setError("");
+    setSuccess("");
   }, [isOpen, student]);
 
   const validatePhoto = (file, rollNumber) => {
@@ -57,6 +59,7 @@ const EditStudentForm = ({ isOpen, onClose, student, classroomId, onUpdated }) =
   const submit = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
 
     if (!student?.id) {
       setError("Missing student");
@@ -91,6 +94,10 @@ const EditStudentForm = ({ isOpen, onClose, student, classroomId, onUpdated }) =
       if (form.photo) {
         // Server ZIP photo endpoint needs classId + rollNumber
         await uploadSingleStudentPhoto({ classId: classroomId || student.classId, rollNumber: rollNoNum, file: form.photo });
+
+        // Show success only for individual photo upload.
+        setSuccess("Upload completed successfully.");
+        await new Promise((r) => setTimeout(r, 900));
       }
 
       await onUpdated?.();
@@ -136,6 +143,12 @@ const EditStudentForm = ({ isOpen, onClose, student, classroomId, onUpdated }) =
               {error && (
                 <div className="text-sm font-semibold rounded-xl px-4 py-3 bg-red-50 text-red-700">
                   {error}
+                </div>
+              )}
+
+              {success && (
+                <div className="text-sm font-semibold rounded-xl px-4 py-3 bg-green-50 text-green-700 border border-green-200">
+                  {success}
                 </div>
               )}
 

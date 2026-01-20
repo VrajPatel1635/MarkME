@@ -14,6 +14,7 @@ const AddStudentForm = ({ isOpen, onClose, classroomId, onCreated }) => {
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const rollNoNum = useMemo(() => Number(String(form.rollNo).trim()), [form.rollNo]);
 
@@ -48,6 +49,7 @@ const AddStudentForm = ({ isOpen, onClose, classroomId, onCreated }) => {
   const submit = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
 
     if (!classroomId) {
       setError("Missing classroom context");
@@ -89,6 +91,10 @@ const AddStudentForm = ({ isOpen, onClose, classroomId, onCreated }) => {
           rollNumber: rollNoNum,
           file: form.photo,
         });
+
+        // Show success only for individual photo upload.
+        setSuccess("Upload completed successfully.");
+        await new Promise((r) => setTimeout(r, 900));
       }
 
       setForm({ name: "", rollNo: "", gender: "", dob: "", photo: null });
@@ -136,6 +142,12 @@ const AddStudentForm = ({ isOpen, onClose, classroomId, onCreated }) => {
               {error && (
                 <div className="text-sm font-semibold rounded-xl px-4 py-3 bg-red-50 text-red-700">
                   {error}
+                </div>
+              )}
+
+              {success && (
+                <div className="text-sm font-semibold rounded-xl px-4 py-3 bg-green-50 text-green-700 border border-green-200">
+                  {success}
                 </div>
               )}
 

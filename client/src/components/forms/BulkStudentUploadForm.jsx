@@ -340,10 +340,6 @@ const BulkStudentUploadForm = ({ isOpen, onClose, classroomId, onUploaded, mode 
                     </div>
                   )}
                 </div>
-              ) : result ? (
-                <div className="text-xs rounded-xl px-4 py-3 bg-green-50 text-green-800 border border-green-200">
-                  <div className="font-bold">Upload completed successfully.</div>
-                </div>
               ) : null}
             </form>
 
