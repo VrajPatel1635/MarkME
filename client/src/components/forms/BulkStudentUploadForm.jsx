@@ -1,5 +1,6 @@
 import { X, Upload, FileSpreadsheet, Images } from "lucide-react";
 import { useMemo, useState } from "react";
+import { flushSync } from "react-dom";
 import { AnimatePresence, motion as Motion } from "framer-motion";
 import {
   bulkUploadStudentsExcel,
@@ -130,7 +131,10 @@ const BulkStudentUploadForm = ({ isOpen, onClose, classroomId, onUploaded, mode 
     try {
       if (mode === "excel") {
         const r = await bulkUploadStudentsExcel({ classId: classroomId, file: excel });
-        setResult(r);
+        // IMPORTANT: React batches state updates inside async handlers.
+        // Flush the result to the UI immediately so row errors are visible
+        // even if the parent triggers a reload right after.
+        flushSync(() => setResult(r));
 
         // If at least one row inserted, refresh parent list.
         const uploaded = Number(r?.uploaded || 0);
@@ -142,7 +146,7 @@ const BulkStudentUploadForm = ({ isOpen, onClose, classroomId, onUploaded, mode 
         if (failedCount === 0) onClose?.();
       } else {
         const r = await bulkUploadStudentPhotosZip({ classId: classroomId, file: zip });
-        setResult(r);
+        flushSync(() => setResult(r));
         await onUploaded?.();
         onClose?.();
       }
