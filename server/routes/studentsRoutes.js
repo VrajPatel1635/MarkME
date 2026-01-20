@@ -72,7 +72,7 @@ router.delete("/:id", auth, requireRole("ADMIN"), studentController.deleteStuden
     @route   POST /api/students/bulk-upload
     @desc    Upload Excel file (.xlsx) and add students
              Excel columns required:
-             name, rollNumber, dob, gender, profileImageUrl
+             name, rollNumber, dob, gender (headers are case/spacing-insensitive)
     @access  Teacher/Admin
     ================================================
 */
