@@ -116,23 +116,23 @@ const BulkStudentUploadForm = ({ isOpen, onClose, classroomId, onUploaded, mode 
     <AnimatePresence>
       {isOpen ? (
         <Motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:backdrop-blur-sm bg-[rgb(var(--primary-text-rgb)/0.5)] w-full h-full"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 sm:backdrop-blur-sm bg-[rgb(var(--primary-text-rgb)/0.5)] w-full h-full"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.18, ease: "easeOut" }}
         >
           <Motion.div
-            className="bg-(--primary-bg) w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-[rgb(var(--primary-accent-rgb)/0.1)]"
+            className="bg-(--primary-bg) w-full max-w-md rounded-3xl sm:rounded-3xl rounded-b-none sm:rounded-b-3xl shadow-2xl overflow-hidden border border-[rgb(var(--primary-accent-rgb)/0.1)] max-h-[92vh] flex flex-col"
             initial={{ opacity: 0, scale: 0.96, y: 8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 8 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
           >
-            <div className="bg-(--primary-accent) p-6 flex justify-between items-center text-(--primary-bg)">
+            <div className="bg-(--primary-accent) p-4 sm:p-6 flex justify-between items-center text-(--primary-bg)">
               <div>
-                <h3 className="text-xl font-bold">{title}</h3>
-                <p className="text-(--secondary-accent) text-sm opacity-90">{description}</p>
+                <h3 className="text-lg sm:text-xl font-bold">{title}</h3>
+                <p className="text-(--secondary-accent) text-xs sm:text-sm opacity-90">{description}</p>
               </div>
               <button
                 type="button"
@@ -143,7 +143,7 @@ const BulkStudentUploadForm = ({ isOpen, onClose, classroomId, onUploaded, mode 
               </button>
             </div>
 
-            <form className="p-6 space-y-4" onSubmit={submit}>
+            <form className="p-4 sm:p-6 space-y-3 sm:space-y-4 overflow-y-auto" onSubmit={submit}>
               {error && (
                 <div className="text-sm font-semibold rounded-xl px-4 py-3 bg-red-50 text-red-700">
                   {error}
@@ -213,7 +213,7 @@ const BulkStudentUploadForm = ({ isOpen, onClose, classroomId, onUploaded, mode 
 
               <button
                 disabled={submitting}
-                className="w-full mt-4 bg-(--primary-accent) disabled:opacity-60 text-(--primary-bg) p-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-(--primary-text) transition-all shadow-[0_10px_15px_-3px_rgb(var(--primary-accent-rgb)/0.2)] hover:-translate-y-0.5"
+                className="w-full mt-2 sm:mt-4 bg-(--primary-accent) disabled:opacity-60 text-(--primary-bg) p-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-(--primary-text) transition-all shadow-[0_10px_15px_-3px_rgb(var(--primary-accent-rgb)/0.2)] hover:-translate-y-0.5"
               >
                 <Upload size={18} /> {submitting ? "Uploading..." : "Upload"}
               </button>
@@ -297,19 +297,19 @@ const BulkStudentUploadForm = ({ isOpen, onClose, classroomId, onUploaded, mode 
             <AnimatePresence>
               {rulesOpen ? (
                 <Motion.div
-                  className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-[rgb(var(--primary-text-rgb)/0.55)]"
+                  className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-3 sm:p-4 bg-[rgb(var(--primary-text-rgb)/0.55)]"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                 >
                   <Motion.div
-                    className="bg-(--primary-bg) w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-[rgb(var(--primary-accent-rgb)/0.1)]"
+                    className="bg-(--primary-bg) w-full max-w-lg rounded-3xl sm:rounded-3xl rounded-b-none sm:rounded-b-3xl shadow-2xl overflow-hidden border border-[rgb(var(--primary-accent-rgb)/0.1)] max-h-[92vh] flex flex-col"
                     initial={{ opacity: 0, scale: 0.96, y: 8 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.96, y: 8 }}
                     transition={{ duration: 0.18, ease: "easeOut" }}
                   >
-                    <div className="bg-(--primary-accent) p-5 flex justify-between items-center text-(--primary-bg)">
+                    <div className="bg-(--primary-accent) p-4 sm:p-5 flex justify-between items-center text-(--primary-bg)">
                       <div>
                         <h3 className="text-lg font-bold">Excel Rules (Bulk Upload)</h3>
                         <p className="text-(--secondary-accent) text-xs opacity-90">
@@ -325,7 +325,7 @@ const BulkStudentUploadForm = ({ isOpen, onClose, classroomId, onUploaded, mode 
                       </button>
                     </div>
 
-                    <div className="p-5 space-y-3 text-sm text-(--primary-text)">
+                    <div className="p-4 sm:p-5 space-y-3 text-sm text-(--primary-text) overflow-y-auto">
                       {rulesLoading ? (
                         <div className="text-sm">Loading rules…</div>
                       ) : rulesError ? (
