@@ -8,6 +8,20 @@ import {
   downloadBulkStudentUploadTemplate,
 } from "../../api/student.api";
 
+const overlayMotion = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 },
+  transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] },
+};
+
+const sheetMotion = {
+  initial: { opacity: 0, scale: 0.98, y: 18 },
+  animate: { opacity: 1, scale: 1, y: 0 },
+  exit: { opacity: 0, scale: 0.98, y: 18 },
+  transition: { type: "spring", stiffness: 520, damping: 42, mass: 0.9 },
+};
+
 const BulkStudentUploadForm = ({ isOpen, onClose, classroomId, onUploaded, mode = "excel" }) => {
   const [excel, setExcel] = useState(null);
   const [zip, setZip] = useState(null);
@@ -113,21 +127,17 @@ const BulkStudentUploadForm = ({ isOpen, onClose, classroomId, onUploaded, mode 
   };
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {isOpen ? (
         <Motion.div
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 sm:backdrop-blur-sm bg-[rgb(var(--primary-text-rgb)/0.5)] w-full h-full"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
+          style={{ willChange: "opacity" }}
+          {...overlayMotion}
         >
           <Motion.div
-            className="bg-(--primary-bg) w-full max-w-md rounded-3xl sm:rounded-3xl rounded-b-none sm:rounded-b-3xl shadow-2xl overflow-hidden border border-[rgb(var(--primary-accent-rgb)/0.1)] max-h-[92vh] flex flex-col"
-            initial={{ opacity: 0, scale: 0.96, y: 8 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 8 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="bg-(--primary-bg) w-full max-w-md rounded-3xl sm:rounded-3xl rounded-b-none sm:rounded-b-3xl shadow-2xl overflow-hidden border border-[rgb(var(--primary-accent-rgb)/0.1)] max-h-[92vh] flex flex-col transform-gpu"
+            style={{ willChange: "transform, opacity" }}
+            {...sheetMotion}
           >
             <div className="bg-(--primary-accent) p-4 sm:p-6 flex justify-between items-center text-(--primary-bg)">
               <div>
@@ -294,20 +304,17 @@ const BulkStudentUploadForm = ({ isOpen, onClose, classroomId, onUploaded, mode 
               ) : null}
             </form>
 
-            <AnimatePresence>
+            <AnimatePresence mode="wait">
               {rulesOpen ? (
                 <Motion.div
                   className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-3 sm:p-4 bg-[rgb(var(--primary-text-rgb)/0.55)]"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
+                  style={{ willChange: "opacity" }}
+                  {...overlayMotion}
                 >
                   <Motion.div
-                    className="bg-(--primary-bg) w-full max-w-lg rounded-3xl sm:rounded-3xl rounded-b-none sm:rounded-b-3xl shadow-2xl overflow-hidden border border-[rgb(var(--primary-accent-rgb)/0.1)] max-h-[92vh] flex flex-col"
-                    initial={{ opacity: 0, scale: 0.96, y: 8 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.96, y: 8 }}
-                    transition={{ duration: 0.18, ease: "easeOut" }}
+                    className="bg-(--primary-bg) w-full max-w-lg rounded-3xl sm:rounded-3xl rounded-b-none sm:rounded-b-3xl shadow-2xl overflow-hidden border border-[rgb(var(--primary-accent-rgb)/0.1)] max-h-[92vh] flex flex-col transform-gpu"
+                    style={{ willChange: "transform, opacity" }}
+                    {...sheetMotion}
                   >
                     <div className="bg-(--primary-accent) p-4 sm:p-5 flex justify-between items-center text-(--primary-bg)">
                       <div>
