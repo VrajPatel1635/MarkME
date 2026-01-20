@@ -16,9 +16,10 @@ const overlayMotion = {
 };
 
 const sheetMotion = {
-  initial: { opacity: 0, scale: 0.98, y: 18 },
+  // Keep Y at 0 so the modal truly opens from center (no slide-from-bottom feel on mobile)
+  initial: { opacity: 0, scale: 0.96, y: 0 },
   animate: { opacity: 1, scale: 1, y: 0 },
-  exit: { opacity: 0, scale: 0.98, y: 18 },
+  exit: { opacity: 0, scale: 0.96, y: 0 },
   transition: { type: "spring", stiffness: 520, damping: 42, mass: 0.9 },
 };
 
