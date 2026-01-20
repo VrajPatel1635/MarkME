@@ -305,105 +305,105 @@ const BulkStudentUploadForm = ({ isOpen, onClose, classroomId, onUploaded, mode 
               ) : null}
             </form>
 
-            <AnimatePresence mode="wait">
-              {rulesOpen ? (
+          </Motion.div>
+
+          {/*
+            IMPORTANT: Render the rules modal OUTSIDE the transformed sheet.
+            If it is nested inside a transformed element, `position: fixed` becomes relative
+            to that element and the overlay can appear clipped/misaligned on mobile.
+          */}
+          <AnimatePresence mode="wait">
+            {rulesOpen ? (
+              <Motion.div
+                className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-4 bg-[rgb(var(--primary-text-rgb)/0.55)]"
+                style={{ willChange: "opacity" }}
+                {...overlayMotion}
+              >
                 <Motion.div
-                  className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-4 bg-[rgb(var(--primary-text-rgb)/0.55)]"
-                  style={{ willChange: "opacity" }}
-                  {...overlayMotion}
+                  className="bg-(--primary-bg) w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-[rgb(var(--primary-accent-rgb)/0.1)] max-h-[92vh] flex flex-col transform-gpu"
+                  style={{ willChange: "transform, opacity" }}
+                  {...sheetMotion}
                 >
-                  <Motion.div
-                    className="bg-(--primary-bg) w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-[rgb(var(--primary-accent-rgb)/0.1)] max-h-[92vh] flex flex-col transform-gpu"
-                    style={{ willChange: "transform, opacity" }}
-                    {...sheetMotion}
-                  >
-                    <div className="bg-(--primary-accent) p-4 sm:p-5 flex justify-between items-center text-(--primary-bg)">
-                      <div>
-                        <h3 className="text-lg font-bold">Excel Rules (Bulk Upload)</h3>
-                        <p className="text-(--secondary-accent) text-xs opacity-90">
-                          Use these rules to avoid upload errors.
-                        </p>
-                      </div>
+                  <div className="bg-(--primary-accent) p-4 sm:p-5 flex justify-between items-center text-(--primary-bg)">
+                    <div>
+                      <h3 className="text-lg font-bold">Excel Rules (Bulk Upload)</h3>
+                      <p className="text-(--secondary-accent) text-xs opacity-90">Use these rules to avoid upload errors.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setRulesOpen(false)}
+                      className="p-2 hover:bg-red-500 rounded-full transition-colors"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  <div className="p-4 sm:p-5 space-y-3 text-sm text-(--primary-text) overflow-y-auto">
+                    {rulesLoading ? (
+                      <div className="text-sm">Loading rules…</div>
+                    ) : rulesError ? (
+                      <div className="text-sm font-semibold rounded-xl px-4 py-3 bg-red-50 text-red-700">{rulesError}</div>
+                    ) : rules ? (
+                      <>
+                        <div className="text-xs rounded-xl px-4 py-3 bg-(--secondary-bg) border border-[rgb(var(--primary-accent-rgb)/0.1)]">
+                          <div className="font-bold">Required columns</div>
+                          <div className="opacity-80">name, rollNumber</div>
+                          <div className="mt-2 font-bold">DOB formats</div>
+                          <div className="opacity-80">
+                            {Array.isArray(rules?.columns)
+                              ? rules.columns.find((c) => c.key === "dob")?.acceptedFormats?.join(", ") || "—"
+                              : "—"}
+                          </div>
+                          <div className="mt-2 font-bold">Gender</div>
+                          <div className="opacity-80">Male/Female are stored as M/F (OTHER supported)</div>
+                        </div>
+
+                        <div className="space-y-2">
+                          {(rules.columns || []).map((c) => (
+                            <div
+                              key={c.key}
+                              className="rounded-xl px-4 py-3 bg-white/5 border border-[rgb(var(--primary-accent-rgb)/0.1)]"
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="font-bold">{c.label}</div>
+                                <div className="text-xs opacity-70">{c.required ? "Required" : "Optional"}</div>
+                              </div>
+                              {c.acceptedHeaders?.length ? (
+                                <div className="text-xs opacity-80 mt-1">Accepted headers: {c.acceptedHeaders.join(", ")}</div>
+                              ) : null}
+                              {c.example != null && c.example !== "" ? (
+                                <div className="text-xs opacity-80 mt-1">Example: {String(c.example)}</div>
+                              ) : null}
+                              {c.note ? <div className="text-xs opacity-70 mt-1">{c.note}</div> : null}
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-sm">No rules found.</div>
+                    )}
+
+                    <div className="flex gap-2 pt-2">
+                      <button
+                        type="button"
+                        onClick={downloadTemplate}
+                        className="flex-1 bg-(--primary-accent) text-(--primary-bg) p-2.5 rounded-xl font-bold hover:bg-(--primary-text) transition-all"
+                      >
+                        Download template
+                      </button>
                       <button
                         type="button"
                         onClick={() => setRulesOpen(false)}
-                        className="p-2 hover:bg-red-500 rounded-full transition-colors"
+                        className="flex-1 px-4 py-2.5 rounded-xl border border-[rgb(var(--primary-accent-rgb)/0.1)] text-(--primary-accent) font-semibold hover:bg-red-500 hover:text-white transition-colors"
                       >
-                        <X size={18} />
+                        Close
                       </button>
                     </div>
-
-                    <div className="p-4 sm:p-5 space-y-3 text-sm text-(--primary-text) overflow-y-auto">
-                      {rulesLoading ? (
-                        <div className="text-sm">Loading rules…</div>
-                      ) : rulesError ? (
-                        <div className="text-sm font-semibold rounded-xl px-4 py-3 bg-red-50 text-red-700">
-                          {rulesError}
-                        </div>
-                      ) : rules ? (
-                        <>
-                          <div className="text-xs rounded-xl px-4 py-3 bg-(--secondary-bg) border border-[rgb(var(--primary-accent-rgb)/0.1)]">
-                            <div className="font-bold">Required columns</div>
-                            <div className="opacity-80">name, rollNumber</div>
-                            <div className="mt-2 font-bold">DOB formats</div>
-                            <div className="opacity-80">
-                              {Array.isArray(rules?.columns)
-                                ? rules.columns.find((c) => c.key === "dob")?.acceptedFormats?.join(", ") || "—"
-                                : "—"}
-                            </div>
-                            <div className="mt-2 font-bold">Gender</div>
-                            <div className="opacity-80">Male/Female are stored as M/F (OTHER supported)</div>
-                          </div>
-
-                          <div className="space-y-2">
-                            {(rules.columns || []).map((c) => (
-                              <div
-                                key={c.key}
-                                className="rounded-xl px-4 py-3 bg-white/5 border border-[rgb(var(--primary-accent-rgb)/0.1)]"
-                              >
-                                <div className="flex items-center justify-between">
-                                  <div className="font-bold">{c.label}</div>
-                                  <div className="text-xs opacity-70">{c.required ? "Required" : "Optional"}</div>
-                                </div>
-                                {c.acceptedHeaders?.length ? (
-                                  <div className="text-xs opacity-80 mt-1">
-                                    Accepted headers: {c.acceptedHeaders.join(", ")}
-                                  </div>
-                                ) : null}
-                                {c.example != null && c.example !== "" ? (
-                                  <div className="text-xs opacity-80 mt-1">Example: {String(c.example)}</div>
-                                ) : null}
-                                {c.note ? <div className="text-xs opacity-70 mt-1">{c.note}</div> : null}
-                              </div>
-                            ))}
-                          </div>
-                        </>
-                      ) : (
-                        <div className="text-sm">No rules found.</div>
-                      )}
-
-                      <div className="flex gap-2 pt-2">
-                        <button
-                          type="button"
-                          onClick={downloadTemplate}
-                          className="flex-1 bg-(--primary-accent) text-(--primary-bg) p-2.5 rounded-xl font-bold hover:bg-(--primary-text) transition-all"
-                        >
-                          Download template
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setRulesOpen(false)}
-                          className="flex-1 px-4 py-2.5 rounded-xl border border-[rgb(var(--primary-accent-rgb)/0.1)] text-(--primary-accent) font-semibold hover:bg-red-500 hover:text-white transition-colors"
-                        >
-                          Close
-                        </button>
-                      </div>
-                    </div>
-                  </Motion.div>
+                  </div>
                 </Motion.div>
-              ) : null}
-            </AnimatePresence>
-          </Motion.div>
+              </Motion.div>
+            ) : null}
+          </AnimatePresence>
         </Motion.div>
       ) : null}
     </AnimatePresence>
