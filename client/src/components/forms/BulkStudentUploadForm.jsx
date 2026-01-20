@@ -339,16 +339,11 @@ const BulkStudentUploadForm = ({ isOpen, onClose, classroomId, onUploaded, mode 
                       <div className="opacity-80">This window will auto-close.</div>
                     </div>
                   )}
-
-                  <details className="text-xs rounded-xl px-4 py-3 bg-gray-50 border" style={{ whiteSpace: "pre-wrap" }}>
-                    <summary className="font-semibold cursor-pointer">Show raw response</summary>
-                    <div className="mt-2 overflow-auto max-h-40">{JSON.stringify(result, null, 2)}</div>
-                  </details>
                 </div>
               ) : result ? (
-                <pre className="text-xs bg-gray-50 border rounded-xl p-3 overflow-auto max-h-40">
-                  {JSON.stringify(result, null, 2)}
-                </pre>
+                <div className="text-xs rounded-xl px-4 py-3 bg-green-50 text-green-800 border border-green-200">
+                  <div className="font-bold">Upload completed successfully.</div>
+                </div>
               ) : null}
             </form>
 
