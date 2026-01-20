@@ -1,6 +1,7 @@
 // src/api/attendance.api.js
 
 import { apiFetch } from "./http";
+import { ensureImageUnderBytes, MAX_UPLOAD_BYTES } from "../utils/imageCompression";
 
 const toUiRecord = (r) => {
     const student = r?.studentId;
@@ -51,8 +52,10 @@ export const uploadClassroomImages = async ({ classId, files, sessionId } = {}) 
             throw new Error('Could not prepare image upload. Please try again.');
         }
 
+            const fileToUpload = await ensureImageUnderBytes(file, { maxBytes: MAX_UPLOAD_BYTES });
+
         const fd = new FormData();
-        fd.append('file', file);
+            fd.append('file', fileToUpload);
         fd.append('api_key', apiKey);
         fd.append('timestamp', String(timestamp));
         fd.append('folder', folder);
