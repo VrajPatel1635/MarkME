@@ -120,14 +120,14 @@ const BulkStudentUploadForm = ({ isOpen, onClose, classroomId, onUploaded, mode 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.18, ease: "easeOut" }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
         >
           <Motion.div
             className="bg-(--primary-bg) w-full max-w-md rounded-3xl sm:rounded-3xl rounded-b-none sm:rounded-b-3xl shadow-2xl overflow-hidden border border-[rgb(var(--primary-accent-rgb)/0.1)] max-h-[92vh] flex flex-col"
             initial={{ opacity: 0, scale: 0.96, y: 8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 8 }}
-            transition={{ duration: 0.18, ease: "easeOut" }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
           >
             <div className="bg-(--primary-accent) p-4 sm:p-6 flex justify-between items-center text-(--primary-bg)">
               <div>
