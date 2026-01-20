@@ -130,12 +130,12 @@ const BulkStudentUploadForm = ({ isOpen, onClose, classroomId, onUploaded, mode 
     <AnimatePresence mode="wait">
       {isOpen ? (
         <Motion.div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-3 sm:p-4 sm:backdrop-blur-sm bg-[rgb(var(--primary-text-rgb)/0.5)] w-full h-full"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 sm:backdrop-blur-sm bg-[rgb(var(--primary-text-rgb)/0.5)] w-full h-full"
           style={{ willChange: "opacity" }}
           {...overlayMotion}
         >
           <Motion.div
-            className="bg-(--primary-bg) w-full max-w-md rounded-3xl sm:rounded-3xl rounded-b-none sm:rounded-b-3xl shadow-2xl overflow-hidden border border-[rgb(var(--primary-accent-rgb)/0.1)] max-h-[92vh] flex flex-col transform-gpu"
+            className="bg-(--primary-bg) w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-[rgb(var(--primary-accent-rgb)/0.1)] max-h-[92vh] flex flex-col transform-gpu"
             style={{ willChange: "transform, opacity" }}
             {...sheetMotion}
           >
@@ -307,12 +307,12 @@ const BulkStudentUploadForm = ({ isOpen, onClose, classroomId, onUploaded, mode 
             <AnimatePresence mode="wait">
               {rulesOpen ? (
                 <Motion.div
-                  className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-3 sm:p-4 bg-[rgb(var(--primary-text-rgb)/0.55)]"
+                  className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-4 bg-[rgb(var(--primary-text-rgb)/0.55)]"
                   style={{ willChange: "opacity" }}
                   {...overlayMotion}
                 >
                   <Motion.div
-                    className="bg-(--primary-bg) w-full max-w-lg rounded-3xl sm:rounded-3xl rounded-b-none sm:rounded-b-3xl shadow-2xl overflow-hidden border border-[rgb(var(--primary-accent-rgb)/0.1)] max-h-[92vh] flex flex-col transform-gpu"
+                    className="bg-(--primary-bg) w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-[rgb(var(--primary-accent-rgb)/0.1)] max-h-[92vh] flex flex-col transform-gpu"
                     style={{ willChange: "transform, opacity" }}
                     {...sheetMotion}
                   >
