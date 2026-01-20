@@ -11,6 +11,7 @@ import { uploadClassroomImages, submitAttendance } from "../../api/attendance.ap
 import { listMyClassesApi } from "../../api/classes.api";
 import { useEffect, useMemo, useState } from "react";
 import { getBaseUrl } from "../../api/http";
+import { useAuth } from "../../context/authContext";
 
 const SUBMITTED_OVERLAY_MS = 1750;
 
@@ -22,7 +23,7 @@ const getLocalYyyyMmDd = () => {
   return `${year}-${month}-${day}`;
 };
 
-const submittedReportKey = (classId) => `attendance:submittedReport:${classId}`;
+const submittedReportKey = (userId, classId) => `attendance:submittedReport:${userId || "anon"}:${classId}`;
 
 const AnimatedSuccessIcon = () => (
   <Motion.div
@@ -64,6 +65,8 @@ const AnimatedSuccessIcon = () => (
 );
 
 const Attendance = () => {
+  const { user } = useAuth();
+
   // Access global state
   const {
     stage, images, attendanceData,
@@ -94,7 +97,7 @@ const Attendance = () => {
   const handleResetFlow = () => {
     try {
       if (typeof window !== "undefined" && activeClass?.id) {
-        localStorage.removeItem(submittedReportKey(activeClass.id));
+        localStorage.removeItem(submittedReportKey(user?.id, activeClass.id));
       }
     } catch {
       // ignore storage failures
@@ -165,18 +168,22 @@ const Attendance = () => {
     if (!activeClass?.id) return;
 
     try {
-      const stored = localStorage.getItem(submittedReportKey(activeClass.id));
+      const key = submittedReportKey(user?.id, activeClass.id);
+      const stored = localStorage.getItem(key);
       if (stored === getLocalYyyyMmDd()) {
         // Ensure the UI is consistent even if the store is fresh after login.
         setImages([]);
         setAttendanceData([]);
         setSessionId(null);
         setStage("submitted");
+      } else if (stored) {
+        // Day-wise: if it's not for today, discard.
+        localStorage.removeItem(key);
       }
     } catch {
       // ignore storage failures
     }
-  }, [activeClass?.id, classesLoading, setAttendanceData, setImages, setSessionId, setStage]);
+  }, [activeClass?.id, classesLoading, setAttendanceData, setImages, setSessionId, setStage, user?.id]);
 
   const summary = useMemo(() => {
     const present = (attendanceData || []).filter((s) => s.status === "P");
@@ -272,6 +279,16 @@ const Attendance = () => {
         syncInitialStatuses();
       }
       setStage("submitted");
+
+      // Persist reaching the final stage for the current day so the teacher
+      // sees the same stage after re-login/reload (day-wise, per class).
+      try {
+        if (activeClass?.id) {
+          localStorage.setItem(submittedReportKey(user?.id, activeClass.id), getLocalYyyyMmDd());
+        }
+      } catch {
+        // ignore storage failures
+      }
     } catch (error) {
       console.error("Submission failed", error);
     }
@@ -315,7 +332,7 @@ const Attendance = () => {
 
       // Persist: if report is generated for today, keep showing "submitted" stage for the day.
       try {
-        localStorage.setItem(submittedReportKey(activeClass.id), getLocalYyyyMmDd());
+        localStorage.setItem(submittedReportKey(user?.id, activeClass.id), getLocalYyyyMmDd());
       } catch {
         // ignore storage failures
       }
