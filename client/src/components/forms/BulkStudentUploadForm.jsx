@@ -30,6 +30,22 @@ const BulkStudentUploadForm = ({ isOpen, onClose, classroomId, onUploaded, mode 
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
 
+  const isRowSuccess = (row) => row?.success === true || row?.success === "true";
+  const isRowFailed = (row) => {
+    if (row?.success === false || row?.success === "false") return true;
+    // Some backends omit `success` but include an error payload.
+    if (row?.success == null && (row?.errors || row?.error || row?.message)) return true;
+    return false;
+  };
+
+  const toErrorList = (row) => {
+    const raw = row?.errors ?? row?.error ?? row?.message;
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw.filter(Boolean).map((e) => String(e));
+    if (typeof raw === "string") return raw.trim() ? [raw] : [];
+    return [JSON.stringify(raw)];
+  };
+
   const [rulesOpen, setRulesOpen] = useState(false);
   const [rulesLoading, setRulesLoading] = useState(false);
   const [rules, setRules] = useState(null);
@@ -44,8 +60,8 @@ const BulkStudentUploadForm = ({ isOpen, onClose, classroomId, onUploaded, mode 
   const excelSummary = useMemo(() => {
     if (mode !== "excel" || !result) return null;
     const list = Array.isArray(result?.results) ? result.results : [];
-    const failedRows = list.filter((x) => x?.success === false);
-    const okRows = list.filter((x) => x?.success === true);
+    const failedRows = list.filter(isRowFailed);
+    const okRows = list.filter(isRowSuccess);
     return {
       uploaded: Number(result?.uploaded || 0),
       failedCount: failedRows.length,
@@ -87,7 +103,7 @@ const BulkStudentUploadForm = ({ isOpen, onClose, classroomId, onUploaded, mode 
 
         // Keep modal open if any row failed, so the user can read errors.
         const list = Array.isArray(r?.results) ? r.results : [];
-        const failedCount = list.filter((x) => x?.success === false).length;
+        const failedCount = list.filter(isRowFailed).length;
         if (failedCount === 0) onClose?.();
       } else {
         const r = await bulkUploadStudentPhotosZip({ classId: classroomId, file: zip });
@@ -277,11 +293,9 @@ const BulkStudentUploadForm = ({ isOpen, onClose, classroomId, onUploaded, mode 
                           >
                             <div className="font-semibold">Row {r?.row ?? "—"}</div>
                             <ul className="list-disc pl-5 opacity-90">
-                              {(Array.isArray(r?.errors) ? r.errors : [r?.errors])
-                                .filter(Boolean)
-                                .map((e, i) => (
-                                  <li key={i}>{String(e)}</li>
-                                ))}
+                              {toErrorList(r).map((e, i) => (
+                                <li key={i}>{e}</li>
+                              ))}
                             </ul>
                           </div>
                         ))}
