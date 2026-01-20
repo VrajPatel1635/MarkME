@@ -41,9 +41,36 @@ const BulkStudentUploadForm = ({ isOpen, onClose, classroomId, onUploaded, mode 
   const toErrorList = (row) => {
     const raw = row?.errors ?? row?.error ?? row?.message;
     if (!raw) return [];
-    if (Array.isArray(raw)) return raw.filter(Boolean).map((e) => String(e));
-    if (typeof raw === "string") return raw.trim() ? [raw] : [];
-    return [JSON.stringify(raw)];
+
+    const list = Array.isArray(raw)
+      ? raw
+      : typeof raw === "string"
+      ? [raw]
+      : [JSON.stringify(raw)];
+
+    const cleaned = list
+      .filter(Boolean)
+      .map((e) => String(e).trim())
+      .filter(Boolean);
+
+    // Deduplicate while preserving order
+    const seen = new Set();
+    const uniq = [];
+    for (const e of cleaned) {
+      const key = e.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      uniq.push(e);
+    }
+
+    // If we already have a specific validation error, hide generic insert noise.
+    const hasDobError = uniq.some((e) => /\bdob\b/i.test(e) || /invalid\s+dob/i.test(e) || /date out of range/i.test(e));
+    const hasDupError = uniq.some((e) => /duplicate\s+rollnumber/i.test(e) || /duplicate\s+roll\s*number/i.test(e));
+    if (hasDobError || hasDupError) {
+      return uniq.filter((e) => !/\binsert failed\b/i.test(e));
+    }
+
+    return uniq;
   };
 
   const [rulesOpen, setRulesOpen] = useState(false);
@@ -269,14 +296,6 @@ const BulkStudentUploadForm = ({ isOpen, onClose, classroomId, onUploaded, mode 
                         </>
                       ) : null}
                     </div>
-                    {excelSummary?.fileUrl ? (
-                      <div className="opacity-70 mt-1 break-all">
-                        File stored at:{" "}
-                        <a className="underline" href={excelSummary.fileUrl} target="_blank" rel="noreferrer">
-                          {excelSummary.fileUrl}
-                        </a>
-                      </div>
-                    ) : null}
                   </div>
 
                   {excelSummary?.failedRows?.length ? (

@@ -36,6 +36,25 @@ function dateOnlyISO(value) {
   return `${y}-${m}-${day}`;
 }
 
+function formatBulkInsertError(err) {
+  const msg = typeof err?.message === "string" ? err.message : "";
+
+  // Normalize common Mongoose/Mongo casting/validation noise into user-friendly messages.
+  // This is especially important for DOB errors coming from insertMany().
+  const lower = msg.toLowerCase();
+  if (lower.includes("cast to date failed") || lower.includes("cast to date") || lower.includes("invalid date")) {
+    return "Invalid dob (date out of range). Use YYYY-MM-DD (e.g., 2008-07-19).";
+  }
+
+  if (lower.includes("validation failed") && (lower.includes("dob") || err?.errors?.dob)) {
+    return "Invalid dob. Use YYYY-MM-DD (e.g., 2008-07-19).";
+  }
+
+  // Fall back to a short message (avoid dumping huge stacky strings)
+  if (msg && msg.length <= 200) return msg;
+  return "Insert failed";
+}
+
 exports.getStudents = async (req, res) => {
   try {
     const { classId } = req.query;
@@ -427,6 +446,27 @@ exports.bulkUpload = async (req, res) => {
 
         // Count successes = attempted - failed
         uploaded = metaToInsert.length - failedIndexes.size;
+
+        // Some failures (CastError/ValidationError) do not surface as Mongo writeErrors.
+        // In that case, report a row-level error for every attempted row so the UI can show it.
+        if (writeErrors.length === 0) {
+          const insertedDocs = Array.isArray(insertErr?.insertedDocs) ? insertErr.insertedDocs : [];
+          const insertedRollNumbers = new Set(insertedDocs.map((d) => d?.rollNumber).filter((x) => x != null));
+
+          uploaded = insertedDocs.length;
+
+          const msg = formatBulkInsertError(insertErr);
+
+          for (const meta of metaToInsert) {
+            if (!meta) continue;
+            const roll = meta?.doc?.rollNumber;
+            if (roll != null && insertedRollNumbers.has(roll)) {
+              resultsByRow.set(meta.rowIndex, { row: meta.rowIndex, success: true, errors: [] });
+            } else {
+              resultsByRow.set(meta.rowIndex, { row: meta.rowIndex, success: false, errors: [msg] });
+            }
+          }
+        }
       }
     }
 
