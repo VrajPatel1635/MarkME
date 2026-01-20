@@ -30,11 +30,19 @@ const BulkStudentUploadForm = ({ isOpen, onClose, classroomId, onUploaded, mode 
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
 
-  const isRowSuccess = (row) => row?.success === true || row?.success === "true";
+  const hasRowErrors = (row) => {
+    const raw = row?.errors ?? row?.error ?? row?.message;
+    if (!raw) return false;
+    if (Array.isArray(raw)) return raw.filter(Boolean).length > 0;
+    if (typeof raw === "string") return raw.trim().length > 0;
+    return true;
+  };
+
+  const isRowSuccess = (row) => (row?.success === true || row?.success === "true") && !hasRowErrors(row);
   const isRowFailed = (row) => {
     if (row?.success === false || row?.success === "false") return true;
-    // Some backends omit `success` but include an error payload.
-    if (row?.success == null && (row?.errors || row?.error || row?.message)) return true;
+    // If an error payload exists, treat as failure even if `success` is missing or incorrect.
+    if (hasRowErrors(row)) return true;
     return false;
   };
 
