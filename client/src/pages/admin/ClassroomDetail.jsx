@@ -139,14 +139,6 @@ const ClassroomDetail = () => {
     show: { opacity: 1, y: 0 },
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-[60vh]">
-        <Loader label="Loading classroom..." />
-      </div>
-    );
-  }
-
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 md:pb-20 max-w-7xl mx-auto space-y-6">
       {/* Screen alert (non-blocking) */}
@@ -269,75 +261,80 @@ const ClassroomDetail = () => {
         onUpdated={load}
       />
 
-
-      <div className="flex items-center">
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-(--primary-bg) border border-[rgb(var(--primary-accent-rgb)/0.1)] text-(--primary-accent) font-semibold hover:bg-(--primary-accent) hover:text-white transition-colors cursor-pointer"
-        >
-          <ArrowLeft size={16} />
-          Back
-        </button>
-      </div>
-      {/* Header */}
-      <div className="bg-(--primary-bg) p-6 rounded-2xl border border-[rgb(var(--primary-accent-rgb)/0.05)] shadow-sm space-y-6">
-        <div className="flex flex-col md:flex-row justify-between gap-4 items-start md:items-center">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-(--secondary-bg) flex items-center justify-center shadow-inner">
-              <Users className="text-(--secondary-accent)" size={24} />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-(--primary-text)">
-                {currentClassroom ? `${currentClassroom.std}-${currentClassroom.div}` : 'Classroom Detail'}
-              </h1>
-              <p className="text-sm text-(--primary-accent) opacity-60 font-medium">
-                {currentClassroom?.year} • {students.length} Students
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-3 items-center">
+      {loading ? (
+        <div className="flex justify-center items-center h-[60vh]">
+          <Loader label="Loading classroom..." />
+        </div>
+      ) : (
+        <>
+          <div className="flex items-center">
             <button
-              onClick={() => setOpenAdd(true)}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-(--primary-accent) text-(--primary-bg) font-bold shadow-lg shadow-[rgb(var(--primary-accent-rgb)/0.2)] hover:bg-(--primary-text) transition-all"
+              type="button"
+              onClick={() => navigate(-1)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-(--primary-bg) border border-[rgb(var(--primary-accent-rgb)/0.1)] text-(--primary-accent) font-semibold hover:bg-(--primary-accent) hover:text-white transition-colors cursor-pointer"
             >
-              <Plus size={18} /> Add Student
+              <ArrowLeft size={16} />
+              Back
             </button>
+          </div>
+          {/* Header */}
+          <div className="bg-(--primary-bg) p-6 rounded-2xl border border-[rgb(var(--primary-accent-rgb)/0.05)] shadow-sm space-y-6">
+            <div className="flex flex-col md:flex-row justify-between gap-4 items-start md:items-center">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-(--secondary-bg) flex items-center justify-center shadow-inner">
+                  <Users className="text-(--secondary-accent)" size={24} />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-(--primary-text)">
+                    {currentClassroom ? `${currentClassroom.std}-${currentClassroom.div}` : 'Classroom Detail'}
+                  </h1>
+                  <p className="text-sm text-(--primary-accent) opacity-60 font-medium">
+                    {currentClassroom?.year} • {students.length} Students
+                  </p>
+                </div>
+              </div>
 
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={openBulkExcel}
-                className="flex items-center gap-2 p-2.5 rounded-xl border border-[rgb(var(--primary-accent-rgb)/0.1)] bg-(--primary-bg) hover:bg-(--secondary-bg) text-(--primary-accent) transition-colors relative group"
-                title="Upload Bulk Excel"
-              >
-                <FileSpreadsheet size={20} /> Upload Bulk Excel
-              </button>
-              <button
-                type="button"
-                onClick={openBulkZip}
-                className="flex items-center gap-2 p-2.5 rounded-xl border border-[rgb(var(--primary-accent-rgb)/0.1)] bg-(--primary-bg) hover:bg-(--secondary-bg) text-(--primary-accent) transition-colors"
-                title="Upload Bulk ZIP (Photos)"
-              >
-                <FileArchive size={20} /> Upload Bulk Zip
-              </button>
+              <div className="flex flex-wrap gap-3 items-center">
+                <button
+                  onClick={() => setOpenAdd(true)}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-(--primary-accent) text-(--primary-bg) font-bold shadow-lg shadow-[rgb(var(--primary-accent-rgb)/0.2)] hover:bg-(--primary-text) transition-all"
+                >
+                  <Plus size={18} /> Add Student
+                </button>
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={openBulkExcel}
+                    className="flex items-center gap-2 p-2.5 rounded-xl border border-[rgb(var(--primary-accent-rgb)/0.1)] bg-(--primary-bg) hover:bg-(--secondary-bg) text-(--primary-accent) transition-colors relative group"
+                    title="Upload Bulk Excel"
+                  >
+                    <FileSpreadsheet size={20} /> Upload Bulk Excel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={openBulkZip}
+                    className="flex items-center gap-2 p-2.5 rounded-xl border border-[rgb(var(--primary-accent-rgb)/0.1)] bg-(--primary-bg) hover:bg-(--secondary-bg) text-(--primary-accent) transition-colors"
+                    title="Upload Bulk ZIP (Photos)"
+                  >
+                    <FileArchive size={20} /> Upload Bulk Zip
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 text-xs text-(--primary-accent) opacity-60 bg-(--secondary-bg)/50 p-2 rounded-lg w-fit">
+              <span className="font-bold flex items-center gap-1 border border-[rgb(var(--primary-accent-rgb)/0.1)] px-1.5 py-0.5 rounded bg-(--primary-bg)">
+                Tip
+              </span>
+              <span>
+                Upload <span className="font-bold">Bulk Excel</span> first (for details), then <span className="font-bold">Bulk ZIP</span> (for photos).
+              </span>
             </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-2 text-xs text-(--primary-accent) opacity-60 bg-(--secondary-bg)/50 p-2 rounded-lg w-fit">
-          <span className="font-bold flex items-center gap-1 border border-[rgb(var(--primary-accent-rgb)/0.1)] px-1.5 py-0.5 rounded bg-(--primary-bg)">
-            Tip
-          </span>
-          <span>
-            Upload <span className="font-bold">Bulk Excel</span> first (for details), then <span className="font-bold">Bulk ZIP</span> (for photos).
-          </span>
-        </div>
-      </div>
-
-      {/* Search */}
-      <div className="relative max-w-md">
+          {/* Search */}
+          <div className="relative max-w-md">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-(--primary-accent) opacity-40" size={20} />
         <input
           className="w-full pl-12 pr-4 py-3 border border-[rgb(var(--primary-accent-rgb)/0.1)] rounded-xl bg-(--primary-bg) focus:outline-none focus:border-(--secondary-accent) focus:ring-1 focus:ring-(--secondary-accent) shadow-sm transition-all"
@@ -471,7 +468,7 @@ const ClassroomDetail = () => {
         </AnimatePresence>
       </motion.div>
 
-      {filteredStudents.length === 0 && !loading && (
+      {filteredStudents.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 text-(--primary-accent) opacity-40">
           <div className="w-16 h-16 bg-(--secondary-bg) rounded-full flex items-center justify-center mb-4">
             <Search size={24} />
@@ -479,6 +476,9 @@ const ClassroomDetail = () => {
           <p className="text-lg font-medium">No students found</p>
           <p className="text-sm">Try adjusting your search criteria</p>
         </div>
+      )}
+
+        </>
       )}
     </motion.div>
   );
