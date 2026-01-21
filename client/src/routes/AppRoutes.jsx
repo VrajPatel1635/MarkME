@@ -14,6 +14,7 @@ import ErrorPage from "../pages/errors/ErrorPage";
 import NotFound from "../pages/errors/NotFound";
 import Forbidden from "../pages/errors/Forbidden";
 import ServerError from "../pages/errors/ServerError";
+import NetworkError from "../pages/errors/NetworkError";
 
 // Teacher
 import TeacherLayout from "../layouts/TeacherLayout";
@@ -55,6 +56,7 @@ const AppRoutes = () => {
         <Route path="/errors/403" element={<Forbidden />} />
         <Route path="/errors/500" element={<ServerError />} />
         <Route path="/errors/404" element={<NotFound />} />
+        <Route path="/errors/network" element={<NetworkError />} />
 
         {/* Teacher */}
         <Route
