@@ -5,6 +5,10 @@ import './index.css'
 import App from './App.jsx'
 import { AuthProvider } from './context/authContext.jsx'
 import { AdminProvider } from './context/adminContext.jsx'
+import { initPWAInstall } from './hooks/usePWAInstall.js'
+
+// Initialize the PWA install prompt listener as early as possible.
+initPWAInstall();
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

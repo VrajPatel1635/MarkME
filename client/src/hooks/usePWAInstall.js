@@ -1,49 +1,82 @@
 import { useCallback, useEffect, useState } from "react";
 
+let deferredPromptGlobal = null;
+let isInstallableGlobal = false;
+let isInitialized = false;
+const subscribers = new Set();
+
+const notify = () => {
+  const snapshot = {
+    deferredPrompt: deferredPromptGlobal,
+    isInstallable: isInstallableGlobal,
+  };
+  subscribers.forEach((fn) => fn(snapshot));
+};
+
+export const initPWAInstall = () => {
+  if (isInitialized) return;
+  if (typeof window === "undefined") return;
+  isInitialized = true;
+
+  const onBeforeInstallPrompt = (event) => {
+    // Chrome (Android/Desktop) fires this when the PWA meets install criteria.
+    // Prevent the mini-infobar and store the event so we can trigger it later.
+    event.preventDefault();
+    deferredPromptGlobal = event;
+    isInstallableGlobal = true;
+    notify();
+  };
+
+  const onAppInstalled = () => {
+    deferredPromptGlobal = null;
+    isInstallableGlobal = false;
+    notify();
+  };
+
+  window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
+  window.addEventListener("appinstalled", onAppInstalled);
+};
+
 const usePWAInstall = () => {
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [isInstallable, setIsInstallable] = useState(false);
+  const [isInstallable, setIsInstallable] = useState(isInstallableGlobal);
+  const [deferredPrompt, setDeferredPrompt] = useState(deferredPromptGlobal);
 
   useEffect(() => {
-    const onBeforeInstallPrompt = (event) => {
-      // Chrome Android fires this when the PWA meets install criteria.
-      // Prevent the mini-infobar and store the event so we can trigger it later.
-      event.preventDefault();
-      setDeferredPrompt(event);
-      setIsInstallable(true);
+    initPWAInstall();
+
+    const onUpdate = (snapshot) => {
+      setDeferredPrompt(snapshot.deferredPrompt);
+      setIsInstallable(snapshot.isInstallable);
     };
 
-    const onAppInstalled = () => {
-      setDeferredPrompt(null);
-      setIsInstallable(false);
-    };
-
-    window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
-    window.addEventListener("appinstalled", onAppInstalled);
+    subscribers.add(onUpdate);
+    // Sync once on mount in case something changed before subscription.
+    onUpdate({ deferredPrompt: deferredPromptGlobal, isInstallable: isInstallableGlobal });
 
     return () => {
-      window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
-      window.removeEventListener("appinstalled", onAppInstalled);
+      subscribers.delete(onUpdate);
     };
   }, []);
 
   const installApp = useCallback(async () => {
-    if (!deferredPrompt) return { outcome: "unavailable" };
+    if (!deferredPromptGlobal) return { outcome: "unavailable" };
 
-    deferredPrompt.prompt();
+    deferredPromptGlobal.prompt();
 
     try {
-      const choiceResult = await deferredPrompt.userChoice;
+      const choiceResult = await deferredPromptGlobal.userChoice;
       // This event can only be used once.
-      setDeferredPrompt(null);
-      setIsInstallable(false);
+      deferredPromptGlobal = null;
+      isInstallableGlobal = false;
+      notify();
       return { outcome: choiceResult?.outcome || "unknown" };
     } catch {
-      setDeferredPrompt(null);
-      setIsInstallable(false);
+      deferredPromptGlobal = null;
+      isInstallableGlobal = false;
+      notify();
       return { outcome: "unknown" };
     }
-  }, [deferredPrompt]);
+  }, []);
 
   return { isInstallable, installApp };
 };
