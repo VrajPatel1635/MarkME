@@ -111,7 +111,7 @@ const AdminSidebar = ({ isMobile, isMobileMenuOpen, items, brandLabel = 'EduAdmi
               <motion.div variants={itemVariants}>
                 <SidebarItem
                   icon={Download}
-                  label="📲 Install App"
+                  label="Install App"
                   onClick={async () => {
                     await installApp();
                     if (isMobile && onClose) {
