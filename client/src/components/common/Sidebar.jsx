@@ -117,7 +117,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, role = "teacher" }) => {
             style={{ cursor: 'pointer' }}
           >
             <Download size={20} />
-            <span className="text-sm font-jakarta font-semibold tracking-wide">📲 Install App</span>
+            <span className="text-sm font-jakarta font-semibold tracking-wide">Install App</span>
           </motion.button>
         )}
       </nav>

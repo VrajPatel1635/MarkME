@@ -23,8 +23,13 @@ createRoot(document.getElementById('root')).render(
 // ✅ Register Service Worker for PWA
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js")
-      .then(() => console.log("Service Worker registered"))
-      .catch(err => console.error("Service Worker error:", err));
+    navigator.serviceWorker
+      .register("/sw.js", { scope: "/", updateViaCache: "none" })
+      .then((registration) => {
+        // Force a check for an updated SW (helps after redeploys).
+        registration.update();
+        console.log("Service Worker registered");
+      })
+      .catch((err) => console.error("Service Worker error:", err));
   });
 }
