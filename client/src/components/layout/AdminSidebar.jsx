@@ -1,9 +1,10 @@
 import React from 'react';
-import { Users, School, LayoutDashboard, Settings, LogOut } from 'lucide-react';
+import { Users, School, LayoutDashboard, Settings, LogOut, Download } from 'lucide-react';
 import { useAdmin } from '../../context/adminContext';
 import { useAuth } from '../../context/authContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import usePWAInstall from '../../hooks/usePWAInstall';
 
 const SidebarItem = ({ icon: Icon, label, active = false, onClick }) => (
   <button
@@ -47,6 +48,8 @@ const AdminSidebar = ({ isMobile, isMobileMenuOpen, items, brandLabel = 'EduAdmi
   const { logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+
+  const { isInstallable, installApp } = usePWAInstall();
 
   const currentPath = location.pathname;
 
@@ -95,7 +98,7 @@ const AdminSidebar = ({ isMobile, isMobileMenuOpen, items, brandLabel = 'EduAdmi
             <SidebarItem {...item} />
           </motion.div>
         ))}
-        {showSettings && (
+        {(isInstallable || showSettings) && (
           <>
             <motion.div
               variants={itemVariants}
@@ -103,9 +106,27 @@ const AdminSidebar = ({ isMobile, isMobileMenuOpen, items, brandLabel = 'EduAdmi
             >
               System
             </motion.div>
-            <motion.div variants={itemVariants}>
-              <SidebarItem icon={Settings} label="Settings" />
-            </motion.div>
+
+            {isInstallable && (
+              <motion.div variants={itemVariants}>
+                <SidebarItem
+                  icon={Download}
+                  label="📲 Install App"
+                  onClick={async () => {
+                    await installApp();
+                    if (isMobile && onClose) {
+                      onClose();
+                    }
+                  }}
+                />
+              </motion.div>
+            )}
+
+            {showSettings && (
+              <motion.div variants={itemVariants}>
+                <SidebarItem icon={Settings} label="Settings" />
+              </motion.div>
+            )}
           </>
         )}
       </motion.nav>

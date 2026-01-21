@@ -1,7 +1,8 @@
 // src/components/common/Sidebar.jsx
 import { NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, ClipboardCheck, Menu, X, LayoutDashboard } from "lucide-react";
+import { Users, ClipboardCheck, Menu, X, LayoutDashboard, Download } from "lucide-react";
+import usePWAInstall from "../../hooks/usePWAInstall";
 
 const NAV_ITEMS_BY_ROLE = {
   teacher: [
@@ -39,6 +40,8 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, role = "teacher" }) => {
   // Use the passed prop for visibility state
   const navItems = NAV_ITEMS_BY_ROLE[role] ?? NAV_ITEMS_BY_ROLE.teacher;
   const panelLabel = role === "principal" ? "Principal Panel" : "Teacher Panel";
+
+  const { isInstallable, installApp } = usePWAInstall();
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-(--primary-accent) text-white overflow-hidden">
@@ -100,6 +103,23 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, role = "teacher" }) => {
             </NavLink>
           );
         })}
+
+        {isInstallable && (
+          <motion.button
+            type="button"
+            whileHover={{ x: 5 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={async () => {
+              await installApp();
+              if (window.innerWidth < 1024) toggleSidebar();
+            }}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-white/50 hover:text-white hover:bg-white/5"
+            style={{ cursor: 'pointer' }}
+          >
+            <Download size={20} />
+            <span className="text-sm font-jakarta font-semibold tracking-wide">📲 Install App</span>
+          </motion.button>
+        )}
       </nav>
 
       {/* Sidebar Footer */}
