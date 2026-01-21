@@ -236,14 +236,14 @@ const BulkStudentUploadForm = ({ isOpen, onClose, classroomId, onUploaded, mode 
                     <button
                       type="button"
                       onClick={openRules}
-                      className="text-xs font-semibold text-(--primary-accent) hover:underline"
+                      className="text-xs font-semibold text-(--primary-accent) underline"
                     >
                       View Excel rules
                     </button>
                     <button
                       type="button"
                       onClick={downloadTemplate}
-                      className="text-xs font-semibold text-(--primary-accent) hover:underline"
+                      className="text-xs font-semibold text-(--primary-accent) underline"
                     >
                       Download template
                     </button>
