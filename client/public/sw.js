@@ -1,7 +1,7 @@
 // A safer SW for SPAs: avoid serving a stale index.html after deploy.
 // If index.html is cached with old hashed asset references, mobile can show a blank screen.
 
-const CACHE_VERSION = "markme-cache-v2";
+const CACHE_VERSION = "markme-cache-v3";
 const RUNTIME_CACHE = `markme-runtime-${CACHE_VERSION}`;
 
 self.addEventListener("install", (event) => {
@@ -13,6 +13,8 @@ self.addEventListener("install", (event) => {
     caches.open(RUNTIME_CACHE).then((cache) =>
       cache.addAll([
         "/manifest.json",
+        // Offline UI assets
+        "/undraw_no-signal_nqfa.svg",
       ])
     )
   );
