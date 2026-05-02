@@ -153,52 +153,5 @@ export const developers = [
             "linkedin": "https://www.linkedin.com/in/vraj-patel-1a28762ba/",
             "portfolio": "https://vraj-portfolio-nu.vercel.app/"
         }
-    },
-    {
-        "id": 4,
-        "name": "Krish Prajapati",
-        "role": "Backend Developer ",
-        "avatar": "/krish-profile-photo.jpeg",
-        "highlights": [
-            "Report generation APIs",
-            "Middleware development",
-            "Backend testing & API contracts"
-        ],
-        "contributions": {
-            "modules": [
-                "Attendance Reports API",
-                "Request Logging Middleware",
-                "Image Serving"
-            ],
-            "features": [
-                "Developed report generation APIs for class-wise and session-wise attendance",
-                "Built request logging middleware to track API calls",
-                "Created utility to convert attendance data into downloadable CSV files",
-                "Implemented session summary endpoint returning present/absent counts",
-                "Handled static image metadata and serving endpoints",
-                "Ensured consistent API response structure across report endpoints"
-            ],
-            "techStack": [
-                "Node.js",
-                "Express.js",
-                "MongoDB",
-                "CSV Export",
-                "REST API"
-            ],
-            "decisions": [
-                "Kept report endpoints stateless and easy to test",
-                "Standardized API responses using { success, data, errors } format",
-                "Focused on GET-based endpoints for faster integration and testing"
-            ],
-            "testing": [
-                "Wrote unit tests for GET /api/reports/session/:sessionId",
-                "Validated monthly report generation for class-wise attendance",
-                "Tested edge cases such as empty attendance records"
-            ]
-        },
-        "links": {
-            "github": "https://github.com/KrishPrajapati04",
-            "linkedin": "https://www.linkedin.com/in/krish-prajapati-407a69284/"
-        }
     }
 ];
